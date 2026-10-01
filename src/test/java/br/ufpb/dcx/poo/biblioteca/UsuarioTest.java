@@ -2,6 +2,7 @@ package br.ufpb.dcx.poo.biblioteca;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -69,5 +70,19 @@ class UsuarioTest {
 
         assertEquals("Ana", biblioteca.usuarios().listarUsuarios().get(0).nome());
         assertEquals("Carlos", biblioteca.usuarios().listarUsuarios().get(2).nome());
+    }
+
+    @Test
+    @DisplayName("usuário desativado deixa de estar ativo e pode ser reativado")
+    void desativarEReativarUsuario() throws BibliotecaException {
+        biblioteca.usuarios().cadastrarUsuario("2026001", "Ana Souza");
+
+        biblioteca.usuarios().desativarUsuario("2026001");
+
+        assertFalse(biblioteca.usuarios().buscarUsuario("2026001").ativo());
+
+        biblioteca.usuarios().reativarUsuario("2026001");
+
+        assertTrue(biblioteca.usuarios().buscarUsuario("2026001").ativo());
     }
 }

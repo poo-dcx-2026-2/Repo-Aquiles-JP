@@ -2,29 +2,19 @@ package br.ufpb.dcx.poo.biblioteca.inicial;
 
 import br.ufpb.dcx.poo.biblioteca.contrato.StatusExemplar;
 
-/**
- * A cópia física de um item. O que se empresta é o exemplar, não o item.
- *
- * <p>Ponto de partida, como {@link Item}.</p>
- */
-public class Exemplar {
+/** Cópia física identificada de forma imutável pelo tombo. */
+final class Exemplar {
 
-    private String tombo;
-    private Item item;
-    private StatusExemplar status;
+    private final String tombo;
+    private final String codigoDoItem;
+    private StatusExemplar status = StatusExemplar.DISPONIVEL;
 
-    public Exemplar(String tombo, Item item) {
+    Exemplar(String tombo, String codigoDoItem) {
         this.tombo = tombo;
-        this.item = item;
-        this.status = StatusExemplar.DISPONIVEL;
+        this.codigoDoItem = codigoDoItem;
     }
 
-    public String getTombo() { return tombo; }
-    public void setTombo(String tombo) { this.tombo = tombo; }
-
-    public Item getItem() { return item; }
-    public void setItem(Item item) { this.item = item; }
-
-    public StatusExemplar getStatus() { return status; }
-    public void setStatus(StatusExemplar status) { this.status = status; }
+    String tombo() { return tombo; }
+    String codigoDoItem() { return codigoDoItem; }
+    StatusExemplar status() { return status; }
 }

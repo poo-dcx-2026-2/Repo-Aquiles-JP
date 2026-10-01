@@ -1,32 +1,58 @@
 @startuml
-' Modelo de domínio do sistema: Entrega 1.
-'
-' Este arquivo é o ponto de partida. Substitua pelo modelo da sua equipe.
-' O diagrama precisa corresponder ao código entregue.
-'
-' Para gerar a imagem: instale o plugin PlantUML no IntelliJ, ou use
-'   plantuml docs/modelo.puml
-' e versione a imagem gerada ao lado deste arquivo.
+title Modelo de domínio — Acervo de jogos de tabuleiro (Entrega 1)
 
 skinparam classAttributeIconSize 0
 hide empty members
 
 class Item {
-  - codigo : String
-  - titulo : String
+  - codigo : String {readOnly}
+  - titulo : String {readOnly}
+  - autoria : String {readOnly}
+  - categoria : String {readOnly}
+  - ano : int {readOnly}
+  - exemplares : List<Exemplar>
+  + adicionarExemplar(exemplar)
+  + exemplares() : List<Exemplar>
 }
 
 class Exemplar {
-  - tombo : String
+  - tombo : String {readOnly}
+  - codigoDoItem : String {readOnly}
+  - status : StatusExemplar
+}
+
+class Usuario {
+  - matricula : String {readOnly}
+  - nome : String {readOnly}
+}
+
+class JogoDeTabuleiro {
+  - codigoDoItem : String {readOnly}
+  - jogadoresMinimos : int {readOnly}
+  - jogadoresMaximos : int {readOnly}
+}
+
+class AcervoEmMemoria {
+  - itensPorCodigo : Map<String, Item>
+  - exemplaresPorTombo : Map<String, Exemplar>
+}
+
+class UsuariosEmMemoria {
+  - usuariosPorMatricula : Map<String, Usuario>
 }
 
 Item "1" *-- "0..*" Exemplar : possui
+Item "1" <-- "0..1" JogoDeTabuleiro : especializa
+AcervoEmMemoria o-- Item : indexa por código
+AcervoEmMemoria o-- Exemplar : indexa por tombo
+UsuariosEmMemoria o-- Usuario : indexa por matrícula
 
-note bottom of Item
-  Ponto de partida, não modelo pronto.
-  Decidam: quais entidades existem,
-  quem guarda o quê, quais invariantes
-  cada objeto protege.
+note bottom of JogoDeTabuleiro
+Regra autoral:
+1 <= jogadoresMinimos <= jogadoresMaximos
 end note
 
+note bottom of AcervoEmMemoria
+O tombo é único no acervo inteiro.
+end note
 @enduml
