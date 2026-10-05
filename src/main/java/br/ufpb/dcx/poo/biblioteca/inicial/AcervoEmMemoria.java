@@ -1,7 +1,10 @@
 package br.ufpb.dcx.poo.biblioteca.inicial;
 
-import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import br.ufpb.dcx.poo.biblioteca.contrato.AcervoService;
 import br.ufpb.dcx.poo.biblioteca.contrato.ExemplarView;
@@ -12,76 +15,79 @@ import br.ufpb.dcx.poo.biblioteca.contrato.excecoes.OperacaoNaoPermitidaExceptio
 import br.ufpb.dcx.poo.biblioteca.contrato.excecoes.RecursoDuplicadoException;
 import br.ufpb.dcx.poo.biblioteca.contrato.excecoes.RecursoNaoEncontradoException;
 
-/**
- * Implementação inicial e parcial do acervo, guardando tudo em memória.
- *
- * <p><strong>Leia antes de estender.</strong> Três métodos já funcionam para os casos
- * mais simples: {@code cadastrarItem}, {@code buscarItem} e {@code listarItens}. Os
- * demais lançam {@link UnsupportedOperationException} e são tarefa sua.</p>
- *
- * <p>O que já está pronto <em>não</em> é um bom exemplo a copiar. Há decisões aqui
- * que você deve questionar ao longo da disciplina: como os itens são guardados, como
- * são procurados, quem é responsável por validar o quê e o que cada objeto expõe
- * para fora de si. Parte da avaliação é justamente perceber e justificar essas
- * mudanças.</p>
- */
+/** Implementação em memória do acervo de jogos de tabuleiro. */
 public class AcervoEmMemoria implements AcervoService {
 
-    private final List<Item> itens = new ArrayList<>();
+    private final Map<String, Item> itensPorCodigo = new HashMap<>();
+    private final Map<String, Exemplar> exemplaresPorTombo = new HashMap<>();
 
     @Override
     public void cadastrarItem(String codigo, String titulo, String autoria,
-                              String categoria, int ano)
-            throws RecursoDuplicadoException {
-
+                              String categoria, int ano) throws RecursoDuplicadoException {
         exigirTextoPreenchido(codigo, "codigo");
         exigirTextoPreenchido(titulo, "titulo");
-
-        if (localizar(codigo) != null) {
+        if (itensPorCodigo.containsKey(codigo)) {
             throw new RecursoDuplicadoException("Já existe item com o código " + codigo);
         }
-        itens.add(new Item(codigo, titulo, autoria, categoria, ano));
+        itensPorCodigo.put(codigo, new Item(codigo, titulo, autoria, categoria, ano));
     }
 
     @Override
     public ItemView buscarItem(String codigo) throws RecursoNaoEncontradoException {
-        Item item = localizar(codigo);
-        if (item == null) {
-            throw new RecursoNaoEncontradoException("Item não encontrado: " + codigo);
-        }
-        return paraView(item);
+        return paraView(localizarItem(codigo));
     }
 
     @Override
     public List<ItemView> listarItens() {
-        List<ItemView> resultado = new ArrayList<>();
-        for (Item item : itens) {
-            resultado.add(paraView(item));
-        }
-        resultado.sort((a, b) -> a.titulo().compareToIgnoreCase(b.titulo()));
-        return resultado;
+        return itensPorCodigo.values().stream()
+                .map(this::paraView)
+                .sorted(Comparator.comparing(ItemView::titulo, String.CASE_INSENSITIVE_ORDER))
+                .toList();
     }
 
     @Override
     public List<ItemView> buscarPorTitulo(String trecho) {
-        throw new UnsupportedOperationException("Entrega 1: implementar buscarPorTitulo");
+        exigirTextoPreenchido(trecho, "trecho");
+        String trechoNormalizado = trecho.toLowerCase(Locale.ROOT);
+        return itensPorCodigo.values().stream()
+                .filter(item -> item.titulo().toLowerCase(Locale.ROOT).contains(trechoNormalizado))
+                .map(this::paraView)
+                .sorted(Comparator.comparing(ItemView::titulo, String.CASE_INSENSITIVE_ORDER))
+                .toList();
     }
 
     @Override
     public List<ItemView> buscarPorCategoria(String categoria) {
-        throw new UnsupportedOperationException("Entrega 2: implementar buscarPorCategoria");
+        exigirTextoPreenchido(categoria, "categoria");
+        return itensPorCodigo.values().stream()
+                .filter(item -> item.categoria().equalsIgnoreCase(categoria))
+                .map(this::paraView)
+                .sorted(Comparator.comparing(ItemView::titulo, String.CASE_INSENSITIVE_ORDER))
+                .toList();
     }
 
     @Override
     public void adicionarExemplar(String codigoDoItem, String tombo)
             throws RecursoNaoEncontradoException, RecursoDuplicadoException {
-        throw new UnsupportedOperationException("Entrega 1: implementar adicionarExemplar");
+        Item item = localizarItem(codigoDoItem);
+        exigirTextoPreenchido(tombo, "tombo");
+        if (exemplaresPorTombo.containsKey(tombo)) {
+            throw new RecursoDuplicadoException("Já existe exemplar com o tombo " + tombo);
+        }
+        Exemplar exemplar = new Exemplar(tombo, item.codigo());
+        item.adicionarExemplar(exemplar);
+        exemplaresPorTombo.put(tombo, exemplar);
     }
 
     @Override
     public List<ExemplarView> listarExemplares(String codigoDoItem)
             throws RecursoNaoEncontradoException {
-        throw new UnsupportedOperationException("Entrega 1: implementar listarExemplares");
+        Item item = localizarItem(codigoDoItem);
+        return item.exemplares().stream()
+                .map(exemplar -> new ExemplarView(
+                        exemplar.tombo(), exemplar.codigoDoItem(), exemplar.status()))
+                .sorted(Comparator.comparing(ExemplarView::tombo, String.CASE_INSENSITIVE_ORDER))
+                .toList();
     }
 
     @Override
@@ -90,45 +96,25 @@ public class AcervoEmMemoria implements AcervoService {
         throw new UnsupportedOperationException("Entrega 2: implementar baixarExemplar");
     }
 
-    /**
-     * Procura um item pelo código. Devolve {@code null} quando não encontra.
-     *
-     * <p>Este é o método que os outros usam para localizar um item.</p>
-     */
-    private Item localizar(String codigo) {
-        for (Item item : itens) {
-            if (item.getCodigo() == codigo) {
-                return item;
-            }
+    private Item localizarItem(String codigo) throws RecursoNaoEncontradoException {
+        Item item = itensPorCodigo.get(codigo);
+        if (item == null) {
+            throw new RecursoNaoEncontradoException("Item não encontrado: " + codigo);
         }
-        return null;
+        return item;
     }
 
     private ItemView paraView(Item item) {
-        int disponiveis = 0;
-        for (Exemplar exemplar : item.getExemplares()) {
-            if (exemplar.getStatus() == StatusExemplar.DISPONIVEL) {
-                disponiveis++;
-            }
-        }
-        return new ItemView(
-                item.getCodigo(),
-                item.getTitulo(),
-                item.getAutoria(),
-                item.getCategoria(),
-                item.getAno(),
-                item.getExemplares().size(),
-                disponiveis);
+        long disponiveis = item.exemplares().stream()
+                .filter(exemplar -> exemplar.status() == StatusExemplar.DISPONIVEL)
+                .count();
+        return new ItemView(item.codigo(), item.titulo(), item.autoria(), item.categoria(),
+                item.ano(), item.exemplares().size(), (int) disponiveis);
     }
 
     private static void exigirTextoPreenchido(String valor, String campo) {
         if (valor == null || valor.isBlank()) {
             throw new DadosInvalidosException("O campo " + campo + " é obrigatório.");
         }
-    }
-
-    /** Acesso interno usado pelos demais serviços da implementação inicial. */
-    List<Item> itens() {
-        return itens;
     }
 }

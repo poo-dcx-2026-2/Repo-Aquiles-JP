@@ -168,3 +168,12 @@ sem compreensão, teste e revisão pela equipe.
 
 O uso correspondente está declarado em
 [`DECLARACAO-DE-USO-DE-IA.md`](../DECLARACAO-DE-USO-DE-IA.md).
+
+## 9. Continuidade — Entrega 2
+
+O primeiro incremento da Entrega 2 foi o estado de ativação do usuário. O teste
+`desativarEReativarUsuario` foi escrito e registrado antes da implementação no commit
+`9310753`, seguindo o passo **Red**. A entidade `Usuario` passou a manter o estado e
+o serviço apenas delega a transição, enquanto `UsuarioView` passa a mostrar o valor
+real. A próxima iteração integrará empréstimos ativos para impedir a desativação de
+quem ainda possui empréstimos, com novo teste escrito antes da regra.
