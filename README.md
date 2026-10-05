@@ -146,5 +146,5 @@ O uso é permitido como apoio, desde que declarado em [`DECLARACAO-DE-USO-DE-IA.
 
 | Nome | Matrícula | GitHub |
 |---|---|---|
-| | | |
-| | | |
+| Aquiles Francisco da Silva | 20250104421 | AquilesFrancisco |
+| João Pedro de Lira Tavares | 20250104501 | jpliratavares |
