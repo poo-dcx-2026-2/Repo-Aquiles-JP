@@ -1,7 +1,7 @@
 # Fluxo de desenvolvimento — análise inicial
 
-**Data:** 29/09/2026
-**Etapa:** levantamento técnico e implementação da Entrega 1
+**Data:** 29/09/2026  
+**Etapa:** levantamento técnico antes da implementação  
 **Objetivo:** demonstrar o entendimento da base fornecida, planejar a evolução sem
 alterar o contrato congelado e registrar o uso responsável de IA.
 
@@ -148,18 +148,13 @@ Atualizar esta documentação e a declaração de uso de IA
    falhas de persistência.
 3. Documentar a extensão autoral do acervo e ao menos uma regra de negócio própria.
 
-## 7. Registro de implementação e validação desta etapa
+## 7. Registro de validação desta etapa
 
-- Foram implementados cadastro, busca, listagem, busca por título, adição e listagem
-  de exemplares; a unicidade global do tombo é garantida pelo índice por tombo.
-- As entidades passaram a ter identidades imutáveis e coleções protegidas por cópias
-  imutáveis. Usuários deixaram de usar listas paralelas e agora são indexados por
-  matrícula.
-- O teste de regressão do defeito de `String` foi criado isoladamente no commit
-  `cceeda0`; a correção subsequente usa `Map#get`, que compara as chaves por conteúdo.
-- O comando `mvn -B verify` continua dependente do Maven Central, que respondeu HTTP
-  403 para `maven-resources-plugin:3.3.1` neste ambiente. A compilação foi também
-  verificada diretamente com `javac --release 21`.
+- Foram inspecionados `README.md`, `pom.xml`, o pacote `contrato`, as classes em
+  `inicial`, `Fabrica`, os testes públicos, o CSV de exemplo e o workflow de CI.
+- O comando `mvn -B verify` foi iniciado. A compilação não prosseguiu porque o Maven
+  recebeu HTTP 403 ao tentar baixar `maven-resources-plugin:3.3.1` do Maven Central;
+  não houve falha atribuível ao código-fonte nesta etapa.
 - Nenhum arquivo do pacote `contrato` foi modificado.
 
 ## 8. Registro de uso de IA
