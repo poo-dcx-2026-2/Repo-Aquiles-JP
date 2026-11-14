@@ -1,15 +1,12 @@
 package br.ufpb.dcx.poo.biblioteca.inicial;
 
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import br.ufpb.dcx.poo.biblioteca.contrato.AcervoService;
 import br.ufpb.dcx.poo.biblioteca.contrato.ExemplarView;
 import br.ufpb.dcx.poo.biblioteca.contrato.ItemView;
-import br.ufpb.dcx.poo.biblioteca.contrato.StatusExemplar;
 import br.ufpb.dcx.poo.biblioteca.contrato.excecoes.DadosInvalidosException;
 import br.ufpb.dcx.poo.biblioteca.contrato.excecoes.OperacaoNaoPermitidaException;
 import br.ufpb.dcx.poo.biblioteca.contrato.excecoes.RecursoDuplicadoException;
@@ -18,18 +15,20 @@ import br.ufpb.dcx.poo.biblioteca.contrato.excecoes.RecursoNaoEncontradoExceptio
 /** Implementação em memória do acervo de jogos de tabuleiro. */
 public class AcervoEmMemoria implements AcervoService {
 
-    private final Map<String, Item> itensPorCodigo = new HashMap<>();
-    private final Map<String, Exemplar> exemplaresPorTombo = new HashMap<>();
+    private final EstadoBiblioteca estado;
+    private final Circulacao circulacao;
+    public AcervoEmMemoria() { this(new EstadoBiblioteca()); }
+    AcervoEmMemoria(EstadoBiblioteca estado) { this.estado = estado; this.circulacao = new Circulacao(estado); }
 
     @Override
     public void cadastrarItem(String codigo, String titulo, String autoria,
                               String categoria, int ano) throws RecursoDuplicadoException {
         exigirTextoPreenchido(codigo, "codigo");
         exigirTextoPreenchido(titulo, "titulo");
-        if (itensPorCodigo.containsKey(codigo)) {
+        if (estado.itens.containsKey(codigo)) {
             throw new RecursoDuplicadoException("Já existe item com o código " + codigo);
         }
-        itensPorCodigo.put(codigo, new Item(codigo, titulo, autoria, categoria, ano));
+        estado.itens.put(codigo, new Item(codigo, titulo, autoria, categoria, ano));
     }
 
     @Override
@@ -39,7 +38,7 @@ public class AcervoEmMemoria implements AcervoService {
 
     @Override
     public List<ItemView> listarItens() {
-        return itensPorCodigo.values().stream()
+        return estado.itens.values().stream()
                 .map(this::paraView)
                 .sorted(Comparator.comparing(ItemView::titulo, String.CASE_INSENSITIVE_ORDER))
                 .toList();
@@ -49,7 +48,7 @@ public class AcervoEmMemoria implements AcervoService {
     public List<ItemView> buscarPorTitulo(String trecho) {
         exigirTextoPreenchido(trecho, "trecho");
         String trechoNormalizado = trecho.toLowerCase(Locale.ROOT);
-        return itensPorCodigo.values().stream()
+        return estado.itens.values().stream()
                 .filter(item -> item.titulo().toLowerCase(Locale.ROOT).contains(trechoNormalizado))
                 .map(this::paraView)
                 .sorted(Comparator.comparing(ItemView::titulo, String.CASE_INSENSITIVE_ORDER))
@@ -59,8 +58,8 @@ public class AcervoEmMemoria implements AcervoService {
     @Override
     public List<ItemView> buscarPorCategoria(String categoria) {
         exigirTextoPreenchido(categoria, "categoria");
-        return itensPorCodigo.values().stream()
-                .filter(item -> item.categoria().equalsIgnoreCase(categoria))
+        return estado.itens.values().stream()
+                .filter(item -> categoria.equalsIgnoreCase(item.categoria()))
                 .map(this::paraView)
                 .sorted(Comparator.comparing(ItemView::titulo, String.CASE_INSENSITIVE_ORDER))
                 .toList();
@@ -69,14 +68,15 @@ public class AcervoEmMemoria implements AcervoService {
     @Override
     public void adicionarExemplar(String codigoDoItem, String tombo)
             throws RecursoNaoEncontradoException, RecursoDuplicadoException {
-        Item item = localizarItem(codigoDoItem);
+        exigirTextoPreenchido(codigoDoItem, "codigo");
         exigirTextoPreenchido(tombo, "tombo");
-        if (exemplaresPorTombo.containsKey(tombo)) {
+        Item item = localizarItem(codigoDoItem);
+        if (estado.exemplares.containsKey(tombo)) {
             throw new RecursoDuplicadoException("Já existe exemplar com o tombo " + tombo);
         }
         Exemplar exemplar = new Exemplar(tombo, item.codigo());
         item.adicionarExemplar(exemplar);
-        exemplaresPorTombo.put(tombo, exemplar);
+        estado.exemplares.put(tombo, exemplar);
     }
 
     @Override
@@ -93,24 +93,14 @@ public class AcervoEmMemoria implements AcervoService {
     @Override
     public void baixarExemplar(String tombo)
             throws RecursoNaoEncontradoException, OperacaoNaoPermitidaException {
-        throw new UnsupportedOperationException("Entrega 2: implementar baixarExemplar");
+        circulacao.baixar(tombo);
     }
 
     private Item localizarItem(String codigo) throws RecursoNaoEncontradoException {
-        Item item = itensPorCodigo.get(codigo);
-        if (item == null) {
-            throw new RecursoNaoEncontradoException("Item não encontrado: " + codigo);
-        }
-        return item;
+        return estado.item(codigo);
     }
 
-    private ItemView paraView(Item item) {
-        long disponiveis = item.exemplares().stream()
-                .filter(exemplar -> exemplar.status() == StatusExemplar.DISPONIVEL)
-                .count();
-        return new ItemView(item.codigo(), item.titulo(), item.autoria(), item.categoria(),
-                item.ano(), item.exemplares().size(), (int) disponiveis);
-    }
+    private ItemView paraView(Item item) { return item.view(); }
 
     private static void exigirTextoPreenchido(String valor, String campo) {
         if (valor == null || valor.isBlank()) {

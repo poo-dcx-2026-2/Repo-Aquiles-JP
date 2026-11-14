@@ -164,7 +164,74 @@ class Entrega2Test {
     @Test void buscaPorCategoriaIgnoraCaixaEOrdenaTitulo() throws Exception {
         b.acervo().cadastrarItem("A", "azul", "", "JOGOS", 2020);
         b.acervo().cadastrarItem("B", "Beta", "", "Outra", 2020);
+        b.acervo().cadastrarItem("N", "Sem categoria", null, null, 2020);
         assertEquals(List.of("A", "I"), b.acervo().buscarPorCategoria("jogos").stream().map(ItemView::codigo).toList());
         assertTrue(b.acervo().buscarPorCategoria("Nada").isEmpty());
+    }
+    @Test void doisExemplaresSeparadosNaoAtendemDuasVezesAMesmaReserva() throws Exception {
+        b.acervo().adicionarExemplar("I", "T2");
+        b.emprestimos().emprestar("T", "U", DIA);
+        b.emprestimos().emprestar("T2", "U", DIA);
+        String primeira = b.emprestimos().reservar("I", "V", DIA);
+        b.emprestimos().reservar("I", "W", DIA);
+        b.usuarios().cadastrarUsuario("X", "Dora");
+        b.emprestimos().reservar("I", "X", DIA);
+        b.emprestimos().devolver("T", DIA);
+        b.emprestimos().devolver("T2", DIA);
+        assertThrows(ExemplarIndisponivelException.class, () -> b.emprestimos().emprestar("T2", "V", DIA));
+        b.emprestimos().cancelarReserva(primeira);
+        assertThrows(ExemplarIndisponivelException.class, () -> b.emprestimos().emprestar("T", "W", DIA));
+        b.emprestimos().emprestar("T", "X", DIA);
+        b.emprestimos().emprestar("T2", "W", DIA);
+        assertTrue(b.emprestimos().listarReservas("I").isEmpty());
+    }
+
+    @Test void limiteNaoConsomeReservaNemExemplarSeparado() throws Exception {
+        b.emprestimos().emprestar("T", "V", DIA);
+        String reserva = b.emprestimos().reservar("I", "U", DIA);
+        b.acervo().cadastrarItem("OUTRO", "Outro", "", "", 2020);
+        for (int i = 1; i <= 3; i++) {
+            b.acervo().adicionarExemplar("OUTRO", "O" + i);
+            b.emprestimos().emprestar("O" + i, "U", DIA);
+        }
+        b.emprestimos().devolver("T", DIA);
+        assertThrows(LimiteDeEmprestimosExcedidoException.class, () -> b.emprestimos().emprestar("T", "U", DIA));
+        assertEquals(reserva, b.emprestimos().listarReservas("I").getFirst().id());
+        assertEquals(StatusExemplar.RESERVADO, b.acervo().listarExemplares("I").getFirst().status());
+        b.emprestimos().devolver("O1", DIA);
+        b.emprestimos().emprestar("T", "U", DIA);
+        assertTrue(b.emprestimos().listarReservas("I").isEmpty());
+    }
+
+    @Test void desativacaoCancelaReservaSeparadaETransfereAoProximo() throws Exception {
+        b.emprestimos().emprestar("T", "U", DIA);
+        b.emprestimos().reservar("I", "V", DIA);
+        b.emprestimos().reservar("I", "W", DIA);
+        b.emprestimos().devolver("T", DIA);
+        b.usuarios().desativarUsuario("V");
+        assertFalse(b.usuarios().buscarUsuario("V").ativo());
+        assertEquals("W", b.emprestimos().listarReservas("I").getFirst().matricula());
+        b.emprestimos().emprestar("T", "W", DIA);
+    }
+
+    @Test void atrasoNaoBloqueiaEmprestimoEListagemOrdenaDataPrevista() throws Exception {
+        b.acervo().adicionarExemplar("I", "T2");
+        b.acervo().adicionarExemplar("I", "T3");
+        String recente = b.emprestimos().emprestar("T", "U", DIA.plusDays(1));
+        String antigo = b.emprestimos().emprestar("T2", "U", DIA);
+        b.emprestimos().emprestar("T3", "U", DIA.plusDays(20));
+        assertEquals(List.of(antigo, recente), b.emprestimos().listarAtrasados(DIA.plusDays(20))
+                .stream().map(EmprestimoView::id).toList());
+    }
+
+    @Test void visoesRetornadasNaoMudamDepoisDaOperacao() throws Exception {
+        ItemView item = b.acervo().buscarItem("I");
+        UsuarioView usuario = b.usuarios().buscarUsuario("U");
+        var exemplares = b.acervo().listarExemplares("I");
+        b.emprestimos().emprestar("T", "U", DIA);
+        assertEquals(1, item.exemplaresDisponiveis());
+        assertEquals(0, usuario.emprestimosAtivos());
+        assertEquals(StatusExemplar.DISPONIVEL, exemplares.getFirst().status());
+        assertThrows(UnsupportedOperationException.class, exemplares::clear);
     }
 }
