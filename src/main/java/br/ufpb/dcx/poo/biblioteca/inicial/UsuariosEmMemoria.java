@@ -1,9 +1,7 @@
 package br.ufpb.dcx.poo.biblioteca.inicial;
 
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import br.ufpb.dcx.poo.biblioteca.contrato.UsuarioService;
 import br.ufpb.dcx.poo.biblioteca.contrato.UsuarioView;
@@ -15,16 +13,19 @@ import br.ufpb.dcx.poo.biblioteca.contrato.excecoes.RecursoNaoEncontradoExceptio
 /** Implementação em memória que indexa usuários por sua matrícula imutável. */
 public class UsuariosEmMemoria implements UsuarioService {
 
-    private final Map<String, Usuario> usuariosPorMatricula = new HashMap<>();
+    private final EstadoBiblioteca estado;
+    private final Circulacao circulacao;
+    public UsuariosEmMemoria() { this(new EstadoBiblioteca()); }
+    UsuariosEmMemoria(EstadoBiblioteca estado) { this.estado = estado; this.circulacao = new Circulacao(estado); }
 
     @Override
     public void cadastrarUsuario(String matricula, String nome) throws RecursoDuplicadoException {
         exigirTextoPreenchido(matricula, "matrícula");
         exigirTextoPreenchido(nome, "nome");
-        if (usuariosPorMatricula.containsKey(matricula)) {
+        if (estado.usuarios.containsKey(matricula)) {
             throw new RecursoDuplicadoException("Já existe usuário com a matrícula " + matricula);
         }
-        usuariosPorMatricula.put(matricula, new Usuario(matricula, nome));
+        estado.usuarios.put(matricula, new Usuario(matricula, nome));
     }
 
     @Override
@@ -34,7 +35,7 @@ public class UsuariosEmMemoria implements UsuarioService {
 
     @Override
     public List<UsuarioView> listarUsuarios() {
-        return usuariosPorMatricula.values().stream()
+        return estado.usuarios.values().stream()
                 .map(this::paraView)
                 .sorted(Comparator.comparing(UsuarioView::nome, String.CASE_INSENSITIVE_ORDER))
                 .toList();
@@ -43,7 +44,7 @@ public class UsuariosEmMemoria implements UsuarioService {
     @Override
     public void desativarUsuario(String matricula)
             throws RecursoNaoEncontradoException, OperacaoNaoPermitidaException {
-        localizarUsuario(matricula).desativar();
+        circulacao.desativar(matricula);
     }
 
     @Override
@@ -52,16 +53,10 @@ public class UsuariosEmMemoria implements UsuarioService {
     }
 
     private Usuario localizarUsuario(String matricula) throws RecursoNaoEncontradoException {
-        Usuario usuario = usuariosPorMatricula.get(matricula);
-        if (usuario == null) {
-            throw new RecursoNaoEncontradoException("Usuário não encontrado: " + matricula);
-        }
-        return usuario;
+        return estado.usuario(matricula);
     }
 
-    private UsuarioView paraView(Usuario usuario) {
-        return new UsuarioView(usuario.matricula(), usuario.nome(), usuario.ativo(), 0);
-    }
+    private UsuarioView paraView(Usuario usuario) { return usuario.view(); }
 
     private static void exigirTextoPreenchido(String valor, String campo) {
         if (valor == null || valor.isBlank()) {

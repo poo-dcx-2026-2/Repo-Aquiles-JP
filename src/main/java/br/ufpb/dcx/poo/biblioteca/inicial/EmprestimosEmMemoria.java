@@ -12,54 +12,49 @@ import br.ufpb.dcx.poo.biblioteca.contrato.excecoes.OperacaoNaoPermitidaExceptio
 import br.ufpb.dcx.poo.biblioteca.contrato.excecoes.RecursoNaoEncontradoException;
 import br.ufpb.dcx.poo.biblioteca.contrato.excecoes.UsuarioInativoException;
 
-/**
- * Esqueleto dos empréstimos. Conteúdo da Entrega 2.
- *
- * <p>As regras estão no enunciado da entrega, não aqui. Repare que
- * {@link EmprestimoService#PRAZO_EM_DIAS} e
- * {@link EmprestimoService#LIMITE_DE_EMPRESTIMOS} são constantes do contrato: os
- * testes contam com esses valores.</p>
- */
-public class EmprestimosNaoImplementados implements EmprestimoService {
+/** Adaptador do contrato para o domínio de circulação. */
+public class EmprestimosEmMemoria implements EmprestimoService {
+    private final Circulacao circulacao;
+    EmprestimosEmMemoria(EstadoBiblioteca estado) { circulacao = new Circulacao(estado); }
 
     @Override
     public String emprestar(String tombo, String matricula, LocalDate data)
             throws RecursoNaoEncontradoException, ExemplarIndisponivelException,
                    UsuarioInativoException, LimiteDeEmprestimosExcedidoException {
-        throw new UnsupportedOperationException("Entrega 2: implementar emprestar");
+        return circulacao.emprestar(tombo, matricula, data);
     }
 
     @Override
     public void devolver(String tombo, LocalDate data)
             throws RecursoNaoEncontradoException, OperacaoNaoPermitidaException {
-        throw new UnsupportedOperationException("Entrega 2: implementar devolver");
+        circulacao.devolver(tombo, data);
     }
 
     @Override
     public List<EmprestimoView> listarEmprestimosDoUsuario(String matricula)
             throws RecursoNaoEncontradoException {
-        throw new UnsupportedOperationException("Entrega 2: implementar listarEmprestimosDoUsuario");
+        return circulacao.historico(matricula);
     }
 
     @Override
     public List<EmprestimoView> listarAtrasados(LocalDate data) {
-        throw new UnsupportedOperationException("Entrega 2: implementar listarAtrasados");
+        return circulacao.atrasados(data);
     }
 
     @Override
     public String reservar(String codigoDoItem, String matricula, LocalDate data)
             throws RecursoNaoEncontradoException, OperacaoNaoPermitidaException {
-        throw new UnsupportedOperationException("Entrega 2: implementar reservar");
+        return circulacao.reservar(codigoDoItem, matricula, data);
     }
 
     @Override
     public List<ReservaView> listarReservas(String codigoDoItem)
             throws RecursoNaoEncontradoException {
-        throw new UnsupportedOperationException("Entrega 2: implementar listarReservas");
+        return circulacao.reservas(codigoDoItem);
     }
 
     @Override
     public void cancelarReserva(String idDaReserva) throws RecursoNaoEncontradoException {
-        throw new UnsupportedOperationException("Entrega 2: implementar cancelarReserva");
+        circulacao.cancelar(idDaReserva);
     }
 }

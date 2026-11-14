@@ -1,148 +1,109 @@
-# Sistema de Gestão de Biblioteca/Acervo
+# Acervo de jogos de tabuleiro — Aquiles e João
 
-Projeto incremental da disciplina de **Programação Orientada a Objetos** — DCX/CCAE/UFPB.
+Projeto de Programação Orientada a Objetos, DCX/CCAE/UFPB, 2026.2.
+A Entrega 2 mantém o acervo da Entrega 1 e implementa empréstimos, devoluções,
+reservas, ativação de usuários e persistência em arquivo.
 
-Este repositório é o ponto de partida do seu projeto. Ele compila, executa e tem testes passando, mas está **deliberadamente incompleto** e contém decisões de design questionáveis. Encontrá-las, justificá-las e corrigi-las faz parte da disciplina.
+## Executar e validar
 
----
+Requisitos: **JDK 21 completo** e **Maven**.
 
-## Começando
-
-Você precisa de **JDK 21** e **Maven**. No IntelliJ IDEA, abra a pasta do projeto e ele reconhece o `pom.xml` sozinho.
-
-```bash
-mvn -B verify      # compila e roda os testes
-mvn -B test        # só os testes
+```sh
+mvn -B verify
+mvn -B -Dtest=Entrega2Test test
+mvn -B -Dtest=PersistenciaTest test
+mvn -B -Dtest=JogoDeTabuleiroTest test
 ```
 
-Se tudo estiver certo, você verá `Tests run: 19, Failures: 0, Errors: 0, Skipped: 5`.
-
-Os 5 pulados são os testes marcados com `@Disabled`: eles cobrem o que você ainda vai implementar. Remova a anotação de cada um quando implementar o método correspondente.
-
----
+A suíte tem 64 casos executados, sem testes desabilitados. O workflow
+[build](.github/workflows/build.yml) executa `mvn -B verify` em pushes e PRs.
+O registro das verificações está em [docs/validacao-entrega-2.md](docs/validacao-entrega-2.md).
 
 ## Mapa do projeto
 
-```
-src/main/java/br/ufpb/dcx/poo/biblioteca/
-├── contrato/          ← CONGELADO. Não edite nada aqui.
-│   ├── Biblioteca.java              ponto único de acesso aos serviços
-│   ├── AcervoService.java           itens e exemplares
-│   ├── UsuarioService.java          usuários
-│   ├── EmprestimoService.java       empréstimos, devoluções e reservas
-│   ├── RelatorioService.java        consultas e importação em lote
-│   ├── *View.java                   o que as consultas devolvem
-│   ├── Status*.java                 estados de exemplar e de empréstimo
-│   └── excecoes/                    a hierarquia de erros do sistema
-│
-├── Fabrica.java       ← nome e assinatura congelados; o corpo é seu
-│
-└── inicial/           ← ponto de partida; altere, mova, renomeie ou apague
-    ├── Item.java
-    ├── Exemplar.java
-    ├── AcervoEmMemoria.java
-    ├── UsuariosEmMemoria.java
-    ├── EmprestimosNaoImplementados.java
-    ├── RelatoriosNaoImplementados.java
-    └── BibliotecaInicial.java
-
-src/test/java/…       ← seus testes; comece pelos que já estão aqui
-dados/                ← arquivos de exemplo
-.github/workflows/    ← a integração contínua, já configurada
-```
-
----
-
-## As duas regras
-
-**1. O pacote `contrato` é congelado.** Não renomeie, não altere assinaturas, não acrescente nem remova métodos. Os testes de correção são escritos contra esses tipos: se você mudar qualquer coisa ali, eles não compilam e a entrega não pode ser avaliada.
-
-**2. `Fabrica.novaBiblioteca()` precisa continuar funcionando.** É por esse método que os testes obtêm o seu sistema. Você vai trocar o que ele devolve — não troque o nome, o pacote nem a assinatura. Cada chamada precisa devolver uma instância nova e independente.
-
-Fora isso, **tudo é seu**. O pacote `inicial` não é modelo: é matéria-prima. Você pode reescrevê-lo inteiro.
-
----
-
-## O que já funciona e o que falta
-
-| Serviço | Situação |
+| Local | Responsabilidade |
 |---|---|
-| `AcervoService` | `cadastrarItem`, `buscarItem` e `listarItens` funcionam para os casos simples. O resto é seu. |
-| `UsuarioService` | `cadastrarUsuario`, `buscarUsuario` e `listarUsuarios` funcionam. `desativar`/`reativar` são da Entrega 2. |
-| `EmprestimoService` | Esqueleto. Entrega 2. |
-| `RelatorioService` | Esqueleto. Entrega 3. |
-| `Biblioteca.salvar/carregar` | Esqueleto. Entrega 2. |
+| `contrato/` | API congelada: serviços, visões, estados e exceções; preservada. |
+| `Fabrica.java` | Cria uma biblioteca nova, vazia e independente; não carrega arquivos. |
+| `inicial/BibliotecaInicial.java` | Facade e única entrada da aplicação; fornece os serviços do contrato. |
+| `inicial/AcervoEmMemoria.java`, `UsuariosEmMemoria.java`, `EmprestimosEmMemoria.java` | Adaptam o contrato ao domínio compartilhado pela biblioteca. |
+| `inicial/EstadoBiblioteca.java` | Indexa entidades, cria snapshots e valida a reconstrução do estado. |
+| `inicial/Item.java`, `Exemplar.java`, `Usuario.java`, `Emprestimo.java`, `Reserva.java`, `Circulacao.java` | Modelo e regras de negócio; sem acesso a arquivos. O nome histórico do pacote foi mantido. |
+| `persistencia/` | Formato textual, leitura, escrita e conversão de erros em `PersistenciaException`. |
+| `inicial/JogoDeTabuleiro.java` | Extensão autoral independente do contrato. |
+| `src/test/java/` | Regressões da Entrega 1, regras da Entrega 2 e extensão. |
+| `docs/` | [Decisões de design](docs/decisoes.md), [UML textual](docs/modelo.puml) e [imagem SVG](docs/modelo.svg). |
 
-Métodos ainda não implementados lançam `UnsupportedOperationException` com a indicação da entrega. Cada mensagem diz o que fazer.
+Relatórios, importação em lote, interface gráfica e concorrência ficam para a Entrega 3.
 
-## Como executar
+## Uso pela Facade
 
-Pré-requisitos: JDK 21 e Maven.
-
-```bash
-mvn -B verify       # compila, executa os testes e valida o projeto
-mvn -B test         # executa somente a suíte JUnit 5
+```java
+Biblioteca biblioteca = Fabrica.novaBiblioteca();
+biblioteca.acervo().cadastrarItem("J1", "Catan", "Klaus Teuber", "Estratégia", 1995);
+biblioteca.acervo().adicionarExemplar("J1", "T1");
+biblioteca.usuarios().cadastrarUsuario("U1", "Ana");
+String id = biblioteca.emprestimos().emprestar("T1", "U1", LocalDate.of(2026, 10, 1));
+biblioteca.salvar();
 ```
 
-O projeto usa JUnit 5 e o workflow em `.github/workflows/build.yml` executa
-`mvn -B verify` em cada push e Pull Request.
+As consultas retornam visões imutáveis. A futura interface gráfica deve utilizar
+somente `Biblioteca` e os serviços obtidos dela, sem acessar entidades ou persistência.
+As datas são sempre fornecidas pelo chamador. O prazo é 14 dias e o limite é 3
+empréstimos ativos; atraso não impede um novo empréstimo no contrato comum.
 
-## Decisões de modelagem e coleções
+A fila de reservas segue a ordem de registro, mesmo se as datas informadas forem
+iguais ou retroativas. Devolução e cancelamento separam exemplares para a próxima
+reserva ainda sem exemplar. Um exemplar novo entra disponível. Ao desativar um usuário
+sem empréstimos ativos, suas reservas são canceladas e seus exemplares separados
+seguem para a próxima pessoa da fila; essa decisão está documentada.
 
-O domínio protege as identidades de `Item`, `Exemplar` e `Usuario`: código, tombo e
-matrícula são definidos na construção e não possuem *setters*. As operações de
-alteração passam pelos serviços, onde as regras de negócio são verificadas.
+## Onde ficam os dados
 
-| Estrutura | Uso | Justificativa |
-|---|---|---|
-| `Map<String, Item>` | Itens indexados pelo código. | Busca e verificação de duplicidade por código são diretas e usam igualdade de conteúdo de `String`. |
-| `Map<String, Exemplar>` | Exemplares indexados pelo tombo. | O tombo é globalmente único, inclusive entre itens diferentes. |
-| `Map<String, Usuario>` | Usuários indexados pela matrícula. | Evita listas paralelas e mantém nome e matrícula no mesmo objeto de domínio. |
-| `List<Exemplar>` | Exemplares pertencentes a um item. | Preserva a composição item–exemplar; o acesso externo é uma cópia imutável. |
+`salvar()` cria `dados/biblioteca-v2.txt` no diretório de execução. A propriedade
+`biblioteca.dados` substitui **o diretório**, por exemplo `-Dbiblioteca.dados=/tmp/acervo`.
+O caminho é consultado a cada salvar/carregar. O arquivo de exemplo
+`dados/itens-exemplo.csv` nunca é alterado; arquivos gerados são ignorados pelo Git.
 
-As consultas devolvem `ItemView`, `ExemplarView` e `UsuarioView`, não entidades
-internas. Isso evita vazamento de estado do domínio.
+O arquivo UTF-8 tem cabeçalho `BIBLIOTECA-2`, registros tabulados e contagem final.
+Textos usam Base64 para preservar caracteres especiais, tabs, quebras de linha e
+valores nulos. São gravados itens, exemplares, usuários, histórico de empréstimos e
+reservas, incluindo as atendidas e canceladas. Contagens das visões são recalculadas.
+IDs são UUIDs e são conferidos contra os IDs já existentes antes do uso.
 
-## Relato do defeito oculto
-
-O método de localização do código comparava textos com `==`. Em Java, `==` compara a
-identidade do objeto, e não o conteúdo; portanto, dois objetos `String` com o mesmo
-texto poderiam não ser reconhecidos como o mesmo código. O teste de regressão foi
-registrado primeiro no commit `cceeda0` e cria duas instâncias distintas de `String`
-com o valor `"L1"`. A correção substitui a comparação por uma busca no `Map`, cuja
-chave usa igualdade de conteúdo. Esse fluxo mantém o defeito coberto pela suíte.
-
----
-
-## Um aviso honesto
-
-O código do pacote `inicial` **tem problemas**. Alguns são de design e você vai reconhecê-los conforme a disciplina avançar. Pelo menos um é um defeito de comportamento que os testes atuais **não** pegam: o sistema faz a coisa errada em uma situação que ninguém testou ainda.
-
-Isso é proposital. Encontrar esse tipo de defeito — reproduzir, escrever o teste que falha, corrigir, ver o teste passar — é uma das competências avaliadas. Não confie em suíte verde como prova de correção.
-
----
+A escrita usa um temporário e troca o arquivo ao final (movimento atômico quando
+suportado). `carregar()` reconstrói e valida um estado separado antes de substituir
+o atual. Arquivo ausente esvazia a biblioteca; arquivo malformado ou com referências
+inconsistentes lança `PersistenciaException`, preservando a memória e a causa do erro.
+Quem deseja recuperar dados precisa chamar `carregar()` explicitamente.
 
 ## Extensão autoral
 
-Sua equipe escolhe um acervo próprio: jogos, filmes, quadrinhos, instrumentos, obras locais, recursos de laboratório. A extensão vive **por fora** do contrato — novos tipos, novos serviços, novas regras — e precisa incluir ao menos **uma regra de negócio própria**, documentada abaixo, que os testes de correção não conhecem e que você demonstra na defesa.
+A regra declarada na Entrega 1 foi mantida: **o mínimo de jogadores deve ser pelo
+menos 1 e o máximo não pode ser menor que o mínimo**. `JogoDeTabuleiro` mantém
+metadados associados ao código do item, sem herança de `Item` e sem alterar o contrato.
 
-### Nossa extensão
+```java
+JogoDeTabuleiro jogo = new JogoDeTabuleiro("J1", 2, 4); // válido
+new JogoDeTabuleiro("J1", 4, 2); // DadosInvalidosException
+```
 
-O acervo da equipe é de **jogos de tabuleiro**. A extensão `JogoDeTabuleiro` registra
-a faixa de participantes de cada jogo. Sua regra de negócio autoral é: o mínimo de
-jogadores deve ser pelo menos 1 e o máximo não pode ser menor que o mínimo. A classe
-valida a regra no construtor e há teste automatizado para o caso válido e para a faixa
-inválida. A extensão é adicional e não altera o pacote `contrato`.
+Código: `src/main/java/br/ufpb/dcx/poo/biblioteca/inicial/JogoDeTabuleiro.java`.
+Os testes próprios cobrem jogo solo, mínimo zero/negativo, faixa invertida e código
+obrigatório. Demonstração no encontro: executar `JogoDeTabuleiroTest` e, depois,
+`Entrega2Test#cicloDeReservaRespeitaFilaEAtendeSomenteReservante`.
+A extensão é um objeto adicional; seu cadastro não integra o estado do contrato.
+A exceção usada já pertence ao contrato congelado, não é uma exceção nova.
 
----
+## Processo e autoria
 
-## Uso de ferramentas de IA
+Mudanças da Entrega 2 estão em branch própria e devem ser integradas por PR com
+revisão substantiva de outro integrante. Um teste executado por IA não substitui
+revisão humana, contribuição individual ou demonstração. Consulte a
+[declaração de uso de IA](DECLARACAO-DE-USO-DE-IA.md); as assinaturas dependem dos integrantes.
 
-O uso é permitido como apoio, desde que declarado em [`DECLARACAO-DE-USO-DE-IA.md`](DECLARACAO-DE-USO-DE-IA.md). Você continua responsável por explicar, testar e adaptar todo o código entregue — inclusive em uma alteração feita presencialmente, sem consulta, na defesa da Entrega 3.
-
----
-
-## Equipe
+O defeito da Entrega 1 que comparava códigos com `==` continua protegido pelo teste
+com instâncias distintas de `String`; a busca usa igualdade de conteúdo por `Map`.
 
 | Nome | Matrícula | GitHub |
 |---|---|---|

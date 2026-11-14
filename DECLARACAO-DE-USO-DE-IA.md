@@ -24,6 +24,12 @@ Uma linha por uso relevante. Se não houve uso, escreva "Não houve uso de ferra
 | 29/09/2026 | Codex (OpenAI, gpt-5.6-terra) | Analisar a estrutura inicial, formalizar TDD e apoiar a implementação da Entrega 1. | `README.md`, `docs/modelo.puml`, implementação e testes fora de `contrato`. O diagrama PNG foi gerado localmente, mas não é versionado porque arquivos binários não são compatíveis com a PR. | A equipe definiu as estruturas de dados, revisou a correção para igualdade de conteúdo de códigos, adotou o ciclo Red–Green–Refactor e deve compreender e validar cada regra, entidade e teste antes da entrega. |
 | 01/10/2026 | Codex (OpenAI, gpt-5.6-terra) | Conduzir o primeiro ciclo TDD da Entrega 2 para o estado de ativação de usuários. | `Usuario.java`, `UsuariosEmMemoria.java`, `UsuarioTest.java` e `docs/FLUXO-DE-DESENVOLVIMENTO.md`, sem alterar `contrato`. | O teste foi registrado antes da implementação; a equipe deve verificar que o estado pertence à entidade `Usuario`, que a *view* o expõe corretamente e que a regra de empréstimos ativos será integrada antes de impedir a desativação. |
 
+| 14/11/2026 | Codex (OpenAI) | Implementar a Entrega 2 a pedido do usuário no Repo-Aquiles-JP: domínio, reservas, persistência, testes e documentação. | Classes de `inicial/`, novo pacote `persistencia/`, `Entrega2Test`, `PersistenciaTest`, ampliação de `JogoDeTabuleiroTest`, README, decisões, UML e `.gitignore`. Contrato preservado. | O agente executou regressões da base, testes que detectaram pendências e a suíte final de 64 casos. A revisão e compreensão pelos dois integrantes, a demonstração e as assinaturas ainda precisam ser feitas por eles; não foram simuladas pelo agente. |
+
+Correção do registro de 29/09: arquivos binários podem ser versionados no Git e em PRs.
+A Entrega 2 inclui `docs/modelo.svg`, gerado a partir do PlantUML, para sanar a ausência
+da imagem apontada na devolutiva. O diagrama também corrige a associação de jogo com item.
+
 ## Compromisso
 
 Ao entregar, a equipe declara que:
@@ -34,4 +40,7 @@ Ao entregar, a equipe declara que:
 - está ciente de que cada integrante fará uma alteração individual em sala, sem consulta,
   na defesa da Entrega 3.
 
-Assinaturas (nome e data):
+Assinaturas (nome e data, a preencher pelos próprios integrantes):
+
+- Aquiles Francisco da Silva: ____________________ Data: __________
+- João Pedro de Lira Tavares: ____________________ Data: __________
