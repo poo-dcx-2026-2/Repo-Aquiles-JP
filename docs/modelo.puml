@@ -1,58 +1,124 @@
 @startuml
-title Modelo de domínio — Acervo de jogos de tabuleiro (Entrega 1)
-
+title Entrega 2 — acervo de jogos, circulação e persistência
 skinparam classAttributeIconSize 0
 hide empty members
-
+left to right direction
+interface Biblioteca
+interface AcervoService
+interface UsuarioService
+interface EmprestimoService
+interface RelatorioService
+class Fabrica
+class BibliotecaInicial
+class AcervoEmMemoria
+class UsuariosEmMemoria
+class EmprestimosEmMemoria
+class RelatoriosNaoImplementados
+class EstadoBiblioteca {
+  itens : Map<String, Item>
+  exemplares : Map<String, Exemplar>
+  usuarios : Map<String, Usuario>
+  emprestimos : Map<String, Emprestimo>
+  reservas : Map<String, Reserva>
+  snapshot()
+  reconstruir(dados)
+  substituir(novo)
+}
+class Circulacao {
+  emprestar(tombo, matricula, data)
+  devolver(tombo, data)
+  reservar(codigo, matricula, data)
+  cancelar(id)
+  desativar(matricula)
+  baixar(tombo)
+}
 class Item {
-  - codigo : String {readOnly}
-  - titulo : String {readOnly}
-  - autoria : String {readOnly}
-  - categoria : String {readOnly}
-  - ano : int {readOnly}
-  - exemplares : List<Exemplar>
-  + adicionarExemplar(exemplar)
-  + exemplares() : List<Exemplar>
+  codigo : String
+  titulo : String
+  view() : ItemView
+  separarProxima(exemplar)
 }
-
 class Exemplar {
-  - tombo : String {readOnly}
-  - codigoDoItem : String {readOnly}
-  - status : StatusExemplar
+  tombo : String
+  codigoDoItem : String
+  status : StatusExemplar
+  exigirEmprestavel(usuario, reserva)
+  baixar()
 }
-
 class Usuario {
-  - matricula : String {readOnly}
-  - nome : String {readOnly}
+  matricula : String
+  nome : String
+  ativo : boolean
+  emprestimosAtivos() : int
+  exigirLimite()
+  desativar()
 }
-
+class Emprestimo {
+  id : String
+  data : LocalDate
+  prevista : LocalDate
+  devolucao : LocalDate
+  devolver(data)
+  atrasado(referencia) : boolean
+}
+class Reserva {
+  id : String
+  data : LocalDate
+  situacao : ATIVA | ATENDIDA | CANCELADA
+  separar(exemplar)
+  voltarAEsperar()
+  encerrar(situacao)
+}
 class JogoDeTabuleiro {
-  - codigoDoItem : String {readOnly}
-  - jogadoresMinimos : int {readOnly}
-  - jogadoresMaximos : int {readOnly}
+  codigoDoItem : String
+  jogadoresMinimos : int
+  jogadoresMaximos : int
 }
-
-class AcervoEmMemoria {
-  - itensPorCodigo : Map<String, Item>
-  - exemplaresPorTombo : Map<String, Exemplar>
+class ArquivoBiblioteca {
+  salvar(dados)
+  carregar() : DadosBiblioteca
 }
-
-class UsuariosEmMemoria {
-  - usuariosPorMatricula : Map<String, Usuario>
-}
-
-Item "1" *-- "0..*" Exemplar : possui
-Item "1" <-- "0..1" JogoDeTabuleiro : especializa
-AcervoEmMemoria o-- Item : indexa por código
-AcervoEmMemoria o-- Exemplar : indexa por tombo
-UsuariosEmMemoria o-- Usuario : indexa por matrícula
-
+class DadosBiblioteca <<record>>
+class ReservaDados <<record>>
+Fabrica ..> BibliotecaInicial : cria vazia
+BibliotecaInicial ..|> Biblioteca
+BibliotecaInicial *-- AcervoEmMemoria
+BibliotecaInicial *-- UsuariosEmMemoria
+BibliotecaInicial *-- EmprestimosEmMemoria
+BibliotecaInicial *-- RelatoriosNaoImplementados
+BibliotecaInicial *-- "1" EstadoBiblioteca
+BibliotecaInicial *-- ArquivoBiblioteca
+AcervoEmMemoria ..|> AcervoService
+UsuariosEmMemoria ..|> UsuarioService
+EmprestimosEmMemoria ..|> EmprestimoService
+RelatoriosNaoImplementados ..|> RelatorioService
+AcervoEmMemoria --> EstadoBiblioteca
+UsuariosEmMemoria --> EstadoBiblioteca
+AcervoEmMemoria *-- Circulacao
+UsuariosEmMemoria *-- Circulacao
+EmprestimosEmMemoria *-- Circulacao
+Circulacao --> EstadoBiblioteca
+EstadoBiblioteca o-- "0..*" Item : indexa
+EstadoBiblioteca o-- "0..*" Exemplar : indexa
+EstadoBiblioteca o-- "0..*" Usuario : indexa
+EstadoBiblioteca o-- "0..*" Emprestimo : indexa
+EstadoBiblioteca o-- "0..*" Reserva : indexa
+Item "1" *-- "0..*" Exemplar
+Item "1" o-- "0..*" Reserva : ordem de chegada
+Usuario "1" o-- "0..*" Emprestimo : histórico
+Emprestimo "0..*" --> "1" Exemplar
+Reserva "0..*" --> "1" Usuario
+Reserva "0..1" --> "0..1" Exemplar : separado
+JogoDeTabuleiro "0..1" --> "1" Item : associação por código
+ArquivoBiblioteca ..> DadosBiblioteca
+EstadoBiblioteca ..> DadosBiblioteca
+DadosBiblioteca *-- "0..*" ReservaDados
 note bottom of JogoDeTabuleiro
-Regra autoral:
-1 <= jogadoresMinimos <= jogadoresMaximos
+  Extensão: 1 <= mínimo <= máximo.
+  Associação por código, sem herança.
 end note
-
-note bottom of AcervoEmMemoria
-O tombo é único no acervo inteiro.
+note bottom of ArquivoBiblioteca
+  Única classe com E/S.
+  dados/biblioteca-v2.txt ou biblioteca.dados.
 end note
 @enduml
