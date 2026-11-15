@@ -30,6 +30,8 @@ Correção do registro de 29/09: arquivos binários podem ser versionados no Git
 A Entrega 2 inclui `docs/modelo.svg`, gerado a partir do PlantUML, para sanar a ausência
 da imagem apontada na devolutiva. O diagrama também corrige a associação de jogo com item.
 
+| 14/11/2026 | ChatGPT (OpenAI, GPT-6) | Apoiar a ampliação da extensão `JogoDeTabuleiro` com `comportaGrupo(int)`, seguindo TDD: preparar testes de limites e entradas inválidas antes da implementação. | `src/test/java/br/ufpb/dcx/poo/biblioteca/JogoDeTabuleiroTest.java`, `src/main/java/br/ufpb/dcx/poo/biblioteca/inicial/JogoDeTabuleiro.java`, `README.md` e esta declaração. O pacote `contrato` não foi alterado. | Os testes, a implementação e a documentação devem ser revisados e compreendidos pelos integrantes; a execução local de `mvn -B verify` ainda precisa ser confirmada. As assinaturas permanecem em branco para preenchimento pelos próprios integrantes. |
+
 ## Compromisso
 
 Ao entregar, a equipe declara que:

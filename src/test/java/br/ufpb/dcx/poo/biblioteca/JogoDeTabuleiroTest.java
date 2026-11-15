@@ -13,7 +13,7 @@ class JogoDeTabuleiroTest {
 
     @Test
     void faixaDeJogadoresValida() {
-        assertEquals(0, new JogoDeTabuleiro("J-01", 2, 4).jogadoresMinimos() - 2);
+        assertEquals(2, new JogoDeTabuleiro("J-01", 2, 4).jogadoresMinimos());
     }
 
     @Test
