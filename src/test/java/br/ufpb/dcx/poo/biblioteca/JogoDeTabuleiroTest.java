@@ -1,6 +1,8 @@
 package br.ufpb.dcx.poo.biblioteca;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
@@ -20,17 +22,17 @@ class JogoDeTabuleiroTest {
     void comportaGrupoAceitaLimitesMinimoEMaximoInclusive() {
         JogoDeTabuleiro jogo = new JogoDeTabuleiro("J-01", 2, 4);
 
-        assertEquals(true, jogo.comportaGrupo(2));
-        assertEquals(true, jogo.comportaGrupo(3));
-        assertEquals(true, jogo.comportaGrupo(4));
+        assertTrue(jogo.comportaGrupo(2));
+        assertTrue(jogo.comportaGrupo(3));
+        assertTrue(jogo.comportaGrupo(4));
     }
 
     @Test
     void comportaGrupoRetornaFalseForaDaFaixaParaQuantidadesPositivas() {
         JogoDeTabuleiro jogo = new JogoDeTabuleiro("J-01", 2, 4);
 
-        assertEquals(false, jogo.comportaGrupo(1));
-        assertEquals(false, jogo.comportaGrupo(5));
+        assertFalse(jogo.comportaGrupo(1));
+        assertFalse(jogo.comportaGrupo(5));
     }
 
     @Test
@@ -49,7 +51,7 @@ class JogoDeTabuleiroTest {
 
     @Test
     void jogoSoloEhValido() {
-        assertEquals(true, new JogoDeTabuleiro("SOLO", 1, 1).comportaGrupo(1));
+        assertTrue(new JogoDeTabuleiro("SOLO", 1, 1).comportaGrupo(1));
     }
 
     @Test
