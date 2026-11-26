@@ -1,6 +1,8 @@
 package br.ufpb.dcx.poo.biblioteca;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
@@ -13,7 +15,32 @@ class JogoDeTabuleiroTest {
 
     @Test
     void faixaDeJogadoresValida() {
-        assertDoesNotThrow(() -> new JogoDeTabuleiro("J-01", 2, 4));
+        assertEquals(2, new JogoDeTabuleiro("J-01", 2, 4).jogadoresMinimos());
+    }
+
+    @Test
+    void comportaGrupoAceitaLimitesMinimoEMaximoInclusive() {
+        JogoDeTabuleiro jogo = new JogoDeTabuleiro("J-01", 2, 4);
+
+        assertTrue(jogo.comportaGrupo(2));
+        assertTrue(jogo.comportaGrupo(3));
+        assertTrue(jogo.comportaGrupo(4));
+    }
+
+    @Test
+    void comportaGrupoRetornaFalseForaDaFaixaParaQuantidadesPositivas() {
+        JogoDeTabuleiro jogo = new JogoDeTabuleiro("J-01", 2, 4);
+
+        assertFalse(jogo.comportaGrupo(1));
+        assertFalse(jogo.comportaGrupo(5));
+    }
+
+    @Test
+    void comportaGrupoRejeitaQuantidadeMenorQueUm() {
+        JogoDeTabuleiro jogo = new JogoDeTabuleiro("J-01", 2, 4);
+
+        assertThrows(DadosInvalidosException.class, () -> jogo.comportaGrupo(0));
+        assertThrows(DadosInvalidosException.class, () -> jogo.comportaGrupo(-1));
     }
 
     @Test
@@ -21,9 +48,10 @@ class JogoDeTabuleiroTest {
         assertThrows(DadosInvalidosException.class,
                 () -> new JogoDeTabuleiro("J-01", 4, 2));
     }
+
     @Test
     void jogoSoloEhValido() {
-        assertDoesNotThrow(() -> new JogoDeTabuleiro("SOLO", 1, 1));
+        assertTrue(new JogoDeTabuleiro("SOLO", 1, 1).comportaGrupo(1));
     }
 
     @Test

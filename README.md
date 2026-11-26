@@ -85,12 +85,19 @@ metadados associados ao código do item, sem herança de `Item` e sem alterar o 
 
 ```java
 JogoDeTabuleiro jogo = new JogoDeTabuleiro("J1", 2, 4); // válido
+boolean aceitaTres = jogo.comportaGrupo(3); // true
+boolean aceitaCinco = jogo.comportaGrupo(5); // false
+jogo.comportaGrupo(0); // DadosInvalidosException
 new JogoDeTabuleiro("J1", 4, 2); // DadosInvalidosException
 ```
 
 Código: `src/main/java/br/ufpb/dcx/poo/biblioteca/inicial/JogoDeTabuleiro.java`.
-Os testes próprios cobrem jogo solo, mínimo zero/negativo, faixa invertida e código
-obrigatório. Demonstração no encontro: executar `JogoDeTabuleiroTest` e, depois,
+O método `comportaGrupo(int quantidadeDeJogadores)` retorna `true` quando a quantidade
+está entre o mínimo e o máximo, inclusive; retorna `false` para quantidades positivas
+fora da faixa e lança `DadosInvalidosException` para zero ou valores negativos.
+Os testes próprios cobrem os dois limites, valores internos e externos, entradas
+inválidas, jogo solo, mínimo zero/negativo, faixa invertida e código obrigatório.
+Demonstração no encontro: executar `JogoDeTabuleiroTest` e, depois,
 `Entrega2Test#cicloDeReservaRespeitaFilaEAtendeSomenteReservante`.
 A extensão é um objeto adicional; seu cadastro não integra o estado do contrato.
 A exceção usada já pertence ao contrato congelado, não é uma exceção nova.
