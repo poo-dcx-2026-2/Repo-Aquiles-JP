@@ -24,4 +24,19 @@ public final class JogoDeTabuleiro {
     public String codigoDoItem() { return codigoDoItem; }
     public int jogadoresMinimos() { return jogadoresMinimos; }
     public int jogadoresMaximos() { return jogadoresMaximos; }
+
+    /**
+     * Informa se a quantidade de jogadores está dentro da faixa permitida.
+     *
+     * @param quantidadeDeJogadores quantidade de participantes do grupo
+     * @return true se a quantidade estiver entre o mínimo e o máximo, inclusive
+     * @throws DadosInvalidosException se a quantidade for menor que um
+     */
+    public boolean comportaGrupo(int quantidadeDeJogadores) {
+        if (quantidadeDeJogadores < 1) {
+            throw new DadosInvalidosException("A quantidade de jogadores deve ser positiva.");
+        }
+        return quantidadeDeJogadores >= jogadoresMinimos
+                && quantidadeDeJogadores <= jogadoresMaximos;
+    }
 }
