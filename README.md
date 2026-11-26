@@ -129,5 +129,5 @@ com instâncias distintas de `String`; a busca usa igualdade de conteúdo por `M
 
 | Nome | Matrícula | GitHub |
 |---|---|---|
-| Aquiles Francisco da Silva | 20250104421 | AquilesFrancisco |
+| Aquiles Francisco da Silva | 20250104421 | aquilesxzz |
 | João Pedro de Lira Tavares | 20250104501 | jpliratavares |
