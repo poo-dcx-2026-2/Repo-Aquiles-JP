@@ -10,7 +10,7 @@ public class BibliotecaInicial implements Biblioteca {
     private final AcervoEmMemoria acervo = new AcervoEmMemoria(estado);
     private final UsuariosEmMemoria usuarios = new UsuariosEmMemoria(estado);
     private final EmprestimosEmMemoria emprestimos = new EmprestimosEmMemoria(estado);
-    private final RelatoriosNaoImplementados relatorios = new RelatoriosNaoImplementados();
+    private final RelatoriosEmMemoria relatorios = new RelatoriosEmMemoria(estado);
     private final ArquivoBiblioteca arquivo = new ArquivoBiblioteca();
     @Override public AcervoService acervo() { return acervo; }
     @Override public UsuarioService usuarios() { return usuarios; }
