@@ -3,6 +3,7 @@ package br.ufpb.dcx.poo.biblioteca.inicial;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -14,6 +15,7 @@ import br.ufpb.dcx.poo.biblioteca.contrato.ItemView;
 import br.ufpb.dcx.poo.biblioteca.contrato.RelatorioService;
 import br.ufpb.dcx.poo.biblioteca.contrato.StatusExemplar;
 import br.ufpb.dcx.poo.biblioteca.contrato.UsuarioView;
+import br.ufpb.dcx.poo.biblioteca.contrato.excecoes.DadosInvalidosException;
 import br.ufpb.dcx.poo.biblioteca.contrato.excecoes.PersistenciaException;
 
 /** Consultas de leitura sobre o estado atual da biblioteca. */
@@ -26,7 +28,22 @@ final class RelatoriosEmMemoria implements RelatorioService {
 
     @Override
     public List<ItemView> itensMaisEmprestados(int n) {
-        throw new UnsupportedOperationException("Entrega 3: implementar itensMaisEmprestados");
+        if (n <= 0) {
+            throw new DadosInvalidosException("O limite de itens deve ser positivo.");
+        }
+
+        Map<String, Long> contagens = estado.emprestimos.values().stream()
+                .map(e -> e.exemplar().codigoDoItem())
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+        return estado.itens.values().stream()
+                .filter(item -> contagens.containsKey(item.codigo()))
+                .sorted(Comparator.<Item>comparingLong(item -> contagens.get(item.codigo()))
+                        .reversed()
+                        .thenComparing(Item::titulo, String.CASE_INSENSITIVE_ORDER))
+                .limit(n)
+                .map(Item::view)
+                .toList();
     }
 
     @Override
@@ -40,7 +57,14 @@ final class RelatoriosEmMemoria implements RelatorioService {
 
     @Override
     public List<UsuarioView> usuariosComAtraso(LocalDate data) {
-        throw new UnsupportedOperationException("Entrega 3: implementar usuariosComAtraso");
+        Validacao.data(data);
+        return estado.emprestimos.values().stream()
+                .filter(emprestimo -> emprestimo.atrasado(data))
+                .map(Emprestimo::usuario)
+                .distinct()
+                .sorted(Comparator.comparing(Usuario::matricula))
+                .map(Usuario::view)
+                .toList();
     }
 
     @Override
