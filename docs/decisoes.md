@@ -78,3 +78,36 @@ da implementação. Rejeitamos apresentar revisão automática como revisão de 
 atribuir commits aos integrantes artificialmente. A consequência é um histórico
 honesto de testes, implementação e documentação, com revisão humana e assinaturas
 explicitamente pendentes.
+
+## Entrega 3
+
+**Contagem por categoria.** A consulta precisa somar o histórico e agrupar grafias que
+diferem apenas em caixa. Escolhemos um Stream que localiza a categoria do item,
+normaliza com `Locale.ROOT` e soma ocorrências com `toMap`. Rejeitamos um laço
+com mapa mutável e `groupingBy`, que rejeita a categoria nula aceita no cadastro.
+A consequência é uma contagem que preserva os dados legados sob a chave nula e
+devolve um mapa de leitura.
+
+**Taxa de ocupação.** A taxa considera emprestados no numerador e os exemplares
+em circulação no denominador. Escolhemos filtrar as baixas e calcular a média de
+1 para emprestado e 0 para os demais. Rejeitamos contar em dois percursos.
+A consequência é uma única passagem, incluindo reservados no denominador e
+retornando 0.0 quando não há exemplares em circulação.
+
+**Ranking de itens.** A consulta precisa ordenar pelo total histórico, incluindo
+devoluções. Escolhemos agrupar e contar por código, depois ordenar somente itens com
+histórico, desempatar por título e construir as visões dos n primeiros. Rejeitamos
+recontar o histórico dentro do comparador. A consequência é uma contagem única por
+item e visões que refletem o estado atual.
+
+**Usuários em atraso.** A consulta deve devolver usuários únicos e o prazo já
+pertence ao empréstimo. Escolhemos filtrar com a regra de `Emprestimo`, deduplicar
+as referências aos usuários e ordenar por matrícula antes de projetar as visões.
+Rejeitamos repetir o cálculo do prazo e manter uma lista mutável dentro do Stream.
+A consequência é a mesma fronteira da circulação, com um resultado por matrícula.
+
+**Devolutiva anterior.** A Entrega 1 apontou a imagem ausente e a relação de
+especialização incorreta no diagrama. A associação por código com `Item` e a imagem
+versionada foram corrigidas na Entrega 2 e atualizadas com a classe de relatórios.
+Mantivemos a regressão de igualdade de códigos por conteúdo e o histórico da extensão
+do Aquiles. A contribuição e a revisão de cada integrante ficam registradas nos PRs.

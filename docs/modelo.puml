@@ -1,5 +1,5 @@
 @startuml
-title Entrega 2 — acervo de jogos, circulação e persistência
+title Entrega 3 — acervo de jogos, circulação, persistência e relatórios
 skinparam classAttributeIconSize 0
 hide empty members
 left to right direction
@@ -13,7 +13,14 @@ class BibliotecaInicial
 class AcervoEmMemoria
 class UsuariosEmMemoria
 class EmprestimosEmMemoria
-class RelatoriosNaoImplementados
+class RelatoriosEmMemoria {
+  emprestimosPorCategoria() : Map<String, Long>
+  taxaDeOcupacaoDoAcervo() : double
+  itensMaisEmprestados(n) : List<ItemView>
+  usuariosComAtraso(data) : List<UsuarioView>
+  importarItensEmLote(arquivo) : int
+}
+class DemoRelatorios
 class EstadoBiblioteca {
   itens : Map<String, Item>
   exemplares : Map<String, Exemplar>
@@ -73,6 +80,7 @@ class JogoDeTabuleiro {
   codigoDoItem : String
   jogadoresMinimos : int
   jogadoresMaximos : int
+  comportaGrupo(quantidadeDeJogadores) : boolean
 }
 class ArquivoBiblioteca {
   salvar(dados)
@@ -85,19 +93,22 @@ BibliotecaInicial ..|> Biblioteca
 BibliotecaInicial *-- AcervoEmMemoria
 BibliotecaInicial *-- UsuariosEmMemoria
 BibliotecaInicial *-- EmprestimosEmMemoria
-BibliotecaInicial *-- RelatoriosNaoImplementados
+BibliotecaInicial *-- RelatoriosEmMemoria
 BibliotecaInicial *-- "1" EstadoBiblioteca
 BibliotecaInicial *-- ArquivoBiblioteca
 AcervoEmMemoria ..|> AcervoService
 UsuariosEmMemoria ..|> UsuarioService
 EmprestimosEmMemoria ..|> EmprestimoService
-RelatoriosNaoImplementados ..|> RelatorioService
+RelatoriosEmMemoria ..|> RelatorioService
 AcervoEmMemoria --> EstadoBiblioteca
 UsuariosEmMemoria --> EstadoBiblioteca
 AcervoEmMemoria *-- Circulacao
 UsuariosEmMemoria *-- Circulacao
 EmprestimosEmMemoria *-- Circulacao
 Circulacao --> EstadoBiblioteca
+RelatoriosEmMemoria --> EstadoBiblioteca : consulta
+DemoRelatorios ..> Fabrica
+DemoRelatorios ..> RelatorioService
 EstadoBiblioteca o-- "0..*" Item : indexa
 EstadoBiblioteca o-- "0..*" Exemplar : indexa
 EstadoBiblioteca o-- "0..*" Usuario : indexa

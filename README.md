@@ -2,7 +2,8 @@
 
 Projeto de Programação Orientada a Objetos, DCX/CCAE/UFPB, 2026.2.
 A Entrega 2 mantém o acervo da Entrega 1 e implementa empréstimos, devoluções,
-reservas, ativação de usuários e persistência em arquivo.
+reservas, ativação de usuários e persistência em arquivo. A Entrega 3 acrescenta
+quatro relatórios de leitura com Streams e amplia os testes.
 
 ## Executar e validar
 
@@ -12,12 +13,21 @@ Requisitos: **JDK 21 completo** e **Maven**.
 mvn -B verify
 mvn -B -Dtest=Entrega2Test test
 mvn -B -Dtest=PersistenciaTest test
-mvn -B -Dtest=JogoDeTabuleiroTest test
+mvn -B -Dtest=CategoriaOcupacaoTest,RankingAtrasosTest test
 ```
 
-A suíte tem 64 casos executados, sem testes desabilitados. O workflow
-[build](.github/workflows/build.yml) executa `mvn -B verify` em pushes e PRs.
-O registro das verificações está em [docs/validacao-entrega-2.md](docs/validacao-entrega-2.md).
+O workflow [build](.github/workflows/build.yml) executa `mvn -B verify` em pushes e PRs.
+O registro da Entrega 2 está em [docs/validacao-entrega-2.md](docs/validacao-entrega-2.md).
+
+## Executar a demonstração dos relatórios
+
+```sh
+mvn -B compile
+java -cp target/classes br.ufpb.dcx.poo.biblioteca.DemoRelatorios
+```
+
+A demonstração do repositório cadastra dois exemplares, empresta um deles e consulta
+categoria, ocupação, ranking e atraso com uma data fixa. A execução usa dados em memória.
 
 ## Mapa do projeto
 
@@ -29,12 +39,20 @@ O registro das verificações está em [docs/validacao-entrega-2.md](docs/valida
 | `inicial/AcervoEmMemoria.java`, `UsuariosEmMemoria.java`, `EmprestimosEmMemoria.java` | Adaptam o contrato ao domínio compartilhado pela biblioteca. |
 | `inicial/EstadoBiblioteca.java` | Indexa entidades, cria snapshots e valida a reconstrução do estado. |
 | `inicial/Item.java`, `Exemplar.java`, `Usuario.java`, `Emprestimo.java`, `Reserva.java`, `Circulacao.java` | Modelo e regras de negócio; sem acesso a arquivos. O nome histórico do pacote foi mantido. |
+| `inicial/RelatoriosEmMemoria.java` | Consultas de leitura sobre o estado atual da biblioteca. |
+| `DemoRelatorios.java` | Exemplo executável dos quatro relatórios pela fachada. |
 | `persistencia/` | Formato textual, leitura, escrita e conversão de erros em `PersistenciaException`. |
 | `inicial/JogoDeTabuleiro.java` | Extensão autoral independente do contrato. |
 | `src/test/java/` | Regressões da Entrega 1, regras da Entrega 2 e extensão. |
 | `docs/` | [Decisões de design](docs/decisoes.md), [UML textual](docs/modelo.puml) e [imagem SVG](docs/modelo.svg). |
 
-Relatórios, importação em lote, interface gráfica e concorrência ficam para a Entrega 3.
+## Limitações conhecidas
+
+O sistema funciona pela API Java. A tela Swing, a importação em lote e o acesso
+concorrente ficaram fora do escopo desta entrega. A importação continua expondo
+a assinatura do contrato e lança `UnsupportedOperationException`.
+Itens legados sem categoria são agrupados sob a chave `null` no relatório por
+categoria. O contrato de cadastro aceita esse valor.
 
 ## Uso pela Facade
 
@@ -97,17 +115,14 @@ está entre o mínimo e o máximo, inclusive; retorna `false` para quantidades p
 fora da faixa e lança `DadosInvalidosException` para zero ou valores negativos.
 Os testes próprios cobrem os dois limites, valores internos e externos, entradas
 inválidas, jogo solo, mínimo zero/negativo, faixa invertida e código obrigatório.
-Demonstração no encontro: executar `JogoDeTabuleiroTest` e, depois,
-`Entrega2Test#cicloDeReservaRespeitaFilaEAtendeSomenteReservante`.
 A extensão é um objeto adicional; seu cadastro não integra o estado do contrato.
 A exceção usada já pertence ao contrato congelado, não é uma exceção nova.
 
 ## Processo e autoria
 
-Mudanças da Entrega 2 estão em branch própria e devem ser integradas por PR com
-revisão substantiva de outro integrante. Um teste executado por IA não substitui
-revisão humana, contribuição individual ou demonstração. Consulte a
-[declaração de uso de IA](DECLARACAO-DE-USO-DE-IA.md); as assinaturas dependem dos integrantes.
+O desenvolvimento da Entrega 3 foi dividido em PRs para revisão por outro
+integrante. A unidade encerra com a versão da `main` e o pipeline verde. Não há
+prova nem defesa nessa unidade. Consulte a [declaração de uso de IA](DECLARACAO-DE-USO-DE-IA.md).
 
 O defeito da Entrega 1 que comparava códigos com `==` continua protegido pelo teste
 com instâncias distintas de `String`; a busca usa igualdade de conteúdo por `Map`.

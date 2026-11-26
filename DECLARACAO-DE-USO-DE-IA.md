@@ -23,14 +23,13 @@ Uma linha por uso relevante. Se não houve uso, escreva "Não houve uso de ferra
 | 29/09/2026 | Codex (OpenAI, gpt-5.6-terra) | Analisar a estrutura inicial, identificar responsabilidades, pendências e riscos técnicos; organizar o registro do fluxo de desenvolvimento e formalizar o uso de Test-Driven Development (TDD). | `DECLARACAO-DE-USO-DE-IA.md` e `docs/FLUXO-DE-DESENVOLVIMENTO.md`. A análise consultou contratos, implementação inicial, testes, dados, CI e configuração Maven, sem alterar o pacote `contrato`. | O escopo foi limitado à documentação da análise inicial e da estratégia TDD. As conclusões foram verificadas pela leitura do código e dos testes públicos; cada implementação futura deverá nascer de um teste, respeitar o contrato e passar por validação da equipe. |
 | 29/09/2026 | Codex (OpenAI, gpt-5.6-terra) | Analisar a estrutura inicial, formalizar TDD e apoiar a implementação da Entrega 1. | `README.md`, `docs/modelo.puml`, implementação e testes fora de `contrato`. O diagrama PNG foi gerado localmente, mas não é versionado porque arquivos binários não são compatíveis com a PR. | A equipe definiu as estruturas de dados, revisou a correção para igualdade de conteúdo de códigos, adotou o ciclo Red–Green–Refactor e deve compreender e validar cada regra, entidade e teste antes da entrega. |
 | 01/10/2026 | Codex (OpenAI, gpt-5.6-terra) | Conduzir o primeiro ciclo TDD da Entrega 2 para o estado de ativação de usuários. | `Usuario.java`, `UsuariosEmMemoria.java`, `UsuarioTest.java` e `docs/FLUXO-DE-DESENVOLVIMENTO.md`, sem alterar `contrato`. | O teste foi registrado antes da implementação; a equipe deve verificar que o estado pertence à entidade `Usuario`, que a *view* o expõe corretamente e que a regra de empréstimos ativos será integrada antes de impedir a desativação. |
-
 | 14/11/2026 | Codex (OpenAI) | Implementar a Entrega 2 a pedido do usuário no Repo-Aquiles-JP: domínio, reservas, persistência, testes e documentação. | Classes de `inicial/`, novo pacote `persistencia/`, `Entrega2Test`, `PersistenciaTest`, ampliação de `JogoDeTabuleiroTest`, README, decisões, UML e `.gitignore`. Contrato preservado. | O agente executou regressões da base, testes que detectaram pendências e a suíte final de 64 casos. A revisão e compreensão pelos dois integrantes, a demonstração e as assinaturas ainda precisam ser feitas por eles; não foram simuladas pelo agente. |
+| 14/11/2026 | ChatGPT (OpenAI, GPT-6) | Apoiar a ampliação da extensão `JogoDeTabuleiro` com `comportaGrupo(int)`, seguindo TDD: preparar testes de limites e entradas inválidas antes da implementação. | `src/test/java/br/ufpb/dcx/poo/biblioteca/JogoDeTabuleiroTest.java`, `src/main/java/br/ufpb/dcx/poo/biblioteca/inicial/JogoDeTabuleiro.java`, `README.md` e esta declaração. O pacote `contrato` não foi alterado. | Os testes, a implementação e a documentação devem ser revisados e compreendidos pelos integrantes; a execução local de `mvn -B verify` ainda precisa ser confirmada. As assinaturas permanecem em branco para preenchimento pelos próprios integrantes. |
+| 26/11/2026 | Codex (OpenAI) | Apoiar a implementação dos quatro relatórios com Streams e a consolidação da Entrega 3. | `RelatoriosEmMemoria`, `BibliotecaInicial`, `CategoriaOcupacaoTest`, `RankingAtrasosTest`, demonstração, README, decisões e UML. | O Codex registrou testes antes da implementação. A revisão da equipe e as assinaturas são pessoais. |
 
 Correção do registro de 29/09: arquivos binários podem ser versionados no Git e em PRs.
 A Entrega 2 inclui `docs/modelo.svg`, gerado a partir do PlantUML, para sanar a ausência
 da imagem apontada na devolutiva. O diagrama também corrige a associação de jogo com item.
-
-| 14/11/2026 | ChatGPT (OpenAI, GPT-6) | Apoiar a ampliação da extensão `JogoDeTabuleiro` com `comportaGrupo(int)`, seguindo TDD: preparar testes de limites e entradas inválidas antes da implementação. | `src/test/java/br/ufpb/dcx/poo/biblioteca/JogoDeTabuleiroTest.java`, `src/main/java/br/ufpb/dcx/poo/biblioteca/inicial/JogoDeTabuleiro.java`, `README.md` e esta declaração. O pacote `contrato` não foi alterado. | Os testes, a implementação e a documentação devem ser revisados e compreendidos pelos integrantes; a execução local de `mvn -B verify` ainda precisa ser confirmada. As assinaturas permanecem em branco para preenchimento pelos próprios integrantes. |
 
 ## Compromisso
 
@@ -38,9 +37,7 @@ Ao entregar, a equipe declara que:
 
 - entende cada trecho do código entregue e consegue explicá-lo oralmente;
 - testou o que foi gerado, e não apenas verificou que compila;
-- adaptou o que foi gerado ao contrato e às decisões de design do projeto;
-- está ciente de que cada integrante fará uma alteração individual em sala, sem consulta,
-  na defesa da Entrega 3.
+- adaptou o que foi gerado ao contrato e às decisões de design do projeto.
 
 Assinaturas (nome e data, a preencher pelos próprios integrantes):
 
